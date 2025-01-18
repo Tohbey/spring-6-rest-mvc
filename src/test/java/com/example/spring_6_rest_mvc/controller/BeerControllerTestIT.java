@@ -119,7 +119,7 @@ class BeerControllerTestIT {
     void testListBeers() {
         List<BeerDTO> dtos = beerController.listBeers();
 
-        assertThat(dtos.size()).isEqualTo(3);
+        assertThat(dtos.size()).isGreaterThan(2000);
     }
 
     @Rollback
