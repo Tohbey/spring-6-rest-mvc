@@ -1,0 +1,10 @@
+services:
+  mysql:
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=rest-mvc'
+      - 'MYSQL_PASSWORD=macbookair'
+      - 'MYSQL_ROOT_PASSWORD=macbookair'
+      - 'MYSQL_USER=root'
+    ports:
+      - '3306'
