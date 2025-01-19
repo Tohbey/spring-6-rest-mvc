@@ -2,6 +2,7 @@ package com.example.spring_6_rest_mvc.controller;
 
 import com.example.spring_6_rest_mvc.dto.BeerDTO;
 import com.example.spring_6_rest_mvc.exception.NotFoundException;
+import com.example.spring_6_rest_mvc.model.BeerStyle;
 import com.example.spring_6_rest_mvc.service.BeerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,9 +53,12 @@ public class BeerController {
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public List<BeerDTO> listBeers(){
-        return beerService.listBeers();
+    public List<BeerDTO> listBeers(@RequestParam(required = false) String beerName,
+                                   @RequestParam(required = false) BeerStyle beerStyle,
+                                   @RequestParam(required = false) Boolean showInventory){
+        return beerService.listBeers(beerName, beerStyle, showInventory);
     }
+
 
     @RequestMapping(value = BEER_BY_ID, method = RequestMethod.GET)
     public BeerDTO getBeerById(@PathVariable("beerId") UUID beerId){
