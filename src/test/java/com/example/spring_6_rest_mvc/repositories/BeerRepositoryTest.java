@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -40,16 +43,19 @@ class BeerRepositoryTest {
 
     @Test
     void testGetBeerListByName() {
-        List<Beer> list = beerRepository.findAllByBeerNameIsLikeIgnoreCase("%IPA%");
+        Pageable pageable  = PageRequest.of(0, 200);
+        Page<Beer> list = beerRepository.findAllByBeerNameIsLikeIgnoreCase("%IPA%", pageable);
 
-        assertThat(list.size()).isEqualTo(336);
+        assertThat(list.getContent().size()).isEqualTo(200);
     }
 
     @Test
     void testGetBeerListByBeerStyle() {
-        List<Beer> list = beerRepository.findAllByBeerStyle(BeerStyle.PALE_ALE);
+        Pageable pageable  = PageRequest.of(0, 200);
 
-        assertThat(list.size()).isEqualTo(14);
+        Page<Beer> list = beerRepository.findAllByBeerStyle(BeerStyle.PALE_ALE, pageable);
+
+        assertThat(list.getContent().size()).isEqualTo(14);
     }
 
     @Test
