@@ -1,6 +1,10 @@
 package com.example.spring_6_rest_mvc.service.impl;
 
 import com.example.spring_6_rest_mvc.dto.BeerDTO;
+import com.example.spring_6_rest_mvc.events.BeerCreatedEvent;
+import com.example.spring_6_rest_mvc.events.BeerDeletedEvent;
+import com.example.spring_6_rest_mvc.events.BeerPatchedEvent;
+import com.example.spring_6_rest_mvc.events.BeerUpdatedEvent;
 import com.example.spring_6_rest_mvc.mappers.BeerMapper;
 import com.example.spring_6_rest_mvc.model.Beer;
 import com.example.spring_6_rest_mvc.model.BeerStyle;
@@ -8,13 +12,18 @@ import com.example.spring_6_rest_mvc.repositories.BeerRepository;
 import com.example.spring_6_rest_mvc.service.BeerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import lombok.val;
+import org.springframework.boot.autoconfigure.pulsar.PulsarProperties;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -32,6 +41,7 @@ public class BeerServiceJPA implements BeerService {
     private final BeerRepository beerRepository;
     private final BeerMapper beerMapper;
     private final CacheManager cacheManager;
+    private final ApplicationEventPublisher eventPublisher;
 
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_PAGE_SIZE = 25;
@@ -115,7 +125,18 @@ public class BeerServiceJPA implements BeerService {
 
     @Override
     public BeerDTO saveNewBeer(BeerDTO beerDTO) {
-        cacheManager.getCache("beerListCache").clear();
+        if(cacheManager.getCache("beerListCache") != null){
+            cacheManager.getCache("beerListCache").clear();
+        }
+
+        Beer savedBeer = beerRepository.save(beerMapper.beerDTOtoBeer(beerDTO));
+
+        System.out.println("Current Thread Name ::: "+Thread.currentThread().getName());
+        System.out.println("Current Thread Id ::: "+Thread.currentThread().getId());
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        eventPublisher.publishEvent(new BeerCreatedEvent(savedBeer, auth));
 
         return beerMapper.beertoBeerDTO(beerRepository.save(beerMapper.beerDTOtoBeer(beerDTO)));
     }
@@ -131,8 +152,15 @@ public class BeerServiceJPA implements BeerService {
             foundBeer.setBeerStyle(beer.getBeerStyle());
             foundBeer.setUpc(beer.getUpc());
             foundBeer.setPrice(beer.getPrice());
+
+            Beer savedBeer = beerRepository.save(foundBeer);
+
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            eventPublisher.publishEvent(new BeerUpdatedEvent(savedBeer, auth));
+
             atomicReference.set(Optional.of(beerMapper
-                    .beertoBeerDTO(beerRepository.save(foundBeer))));
+                    .beertoBeerDTO(savedBeer)));
         }, () -> {
             atomicReference.set(Optional.empty());
         });
@@ -149,6 +177,14 @@ public class BeerServiceJPA implements BeerService {
         clearCache(id);
 
         if(beerRepository.existsById(id)) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            eventPublisher.publishEvent(
+                    new BeerDeletedEvent(
+                            Beer.builder().id(id).build(), auth
+                    )
+            );
+
             beerRepository.deleteById(id);
             return Boolean.TRUE;
         }else{
@@ -177,8 +213,13 @@ public class BeerServiceJPA implements BeerService {
             if (beer.getQuantityOnHand() != null){
                 foundBeer.setQuantityOnHand(beer.getQuantityOnHand());
             }
-            atomicReference.set(Optional.of(beerMapper
-                    .beertoBeerDTO(beerRepository.save(foundBeer))));
+
+            Beer savedBeer = beerRepository.save(foundBeer);
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            eventPublisher.publishEvent(new BeerPatchedEvent(savedBeer, auth));
+
+            atomicReference.set(Optional.of(beerMapper.beertoBeerDTO(savedBeer)));
         }, () -> {
             atomicReference.set(Optional.empty());
         });

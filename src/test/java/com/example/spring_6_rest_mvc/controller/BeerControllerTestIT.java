@@ -1,6 +1,9 @@
 package com.example.spring_6_rest_mvc.controller;
 
 import com.example.spring_6_rest_mvc.dto.BeerDTO;
+import com.example.spring_6_rest_mvc.events.BeerCreatedEvent;
+import com.example.spring_6_rest_mvc.events.BeerDeletedEvent;
+import com.example.spring_6_rest_mvc.events.BeerUpdatedEvent;
 import com.example.spring_6_rest_mvc.exception.NotFoundException;
 import com.example.spring_6_rest_mvc.mappers.BeerMapper;
 import com.example.spring_6_rest_mvc.model.Beer;
@@ -9,6 +12,7 @@ import com.example.spring_6_rest_mvc.repositories.BeerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.hamcrest.core.IsNull;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
 import org.springframework.test.annotation.Rollback;
+import org.springframework.test.context.event.ApplicationEvents;
+import org.springframework.test.context.event.RecordApplicationEvents;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -38,6 +44,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@RecordApplicationEvents
 @SpringBootTest
 class BeerControllerTestIT {
     @Autowired
@@ -54,6 +61,9 @@ class BeerControllerTestIT {
 
     @Autowired
     WebApplicationContext wac;
+
+    @Autowired
+    ApplicationEvents applicationEvents;
 
     MockMvc mockMvc;
 
@@ -104,6 +114,8 @@ class BeerControllerTestIT {
 
         Beer updatedBeer = beerRepository.findById(beer.getId()).get();
         assertThat(updatedBeer.getBeerName()).isEqualTo(beerName);
+
+        Assertions.assertEquals(1, applicationEvents.stream(BeerUpdatedEvent.class).count());
     }
 
     @Rollback
@@ -125,6 +137,7 @@ class BeerControllerTestIT {
         Optional<Beer> savedBeer = beerRepository.findById(savedUUID);
 
         assertThat(savedBeer).isNotNull();
+        Assertions.assertEquals(1, applicationEvents.stream(BeerCreatedEvent.class).count());
     }
 
     @Test
@@ -241,6 +254,8 @@ class BeerControllerTestIT {
 
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
         assertThat(beerRepository.findById(beer.getId()).isEmpty());
+
+        Assertions.assertEquals(1, applicationEvents.stream(BeerDeletedEvent.class).count());
     }
 
     @Test
