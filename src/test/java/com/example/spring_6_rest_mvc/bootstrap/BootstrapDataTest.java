@@ -1,5 +1,6 @@
 package com.example.spring_6_rest_mvc.bootstrap;
 
+import com.example.spring_6_rest_mvc.repositories.BeerOrderRepository;
 import com.example.spring_6_rest_mvc.repositories.BeerRepository;
 import com.example.spring_6_rest_mvc.repositories.CustomerRepository;
 import com.example.spring_6_rest_mvc.service.BeerCsvService;
@@ -27,9 +28,12 @@ class BootstrapDataTest {
 
     BootstrapData bootstrapData;
 
+    @Autowired
+    BeerOrderRepository beerOrderRepository;
+
     @BeforeEach
     void setUp() {
-        bootstrapData = new BootstrapData(beerRepository, customerRepository, beerCsvService);
+        bootstrapData = new BootstrapData(beerRepository, customerRepository, beerCsvService, beerOrderRepository);
     }
 
     @Test

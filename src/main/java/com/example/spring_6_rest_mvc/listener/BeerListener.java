@@ -43,6 +43,8 @@ public class BeerListener {
             beerAudit.setPrincipalName(event.getAuthentication().getName());
         }
 
+        beerAudit.setAuditEventType(eventType);
+
         val savedBeerAudit = beerAuditRepository.save(beerAudit);
         log.info("Saved beer audit ::: {}", savedBeerAudit.getAuditEventType());
         log.info("Event type audit ::: {}", eventType);

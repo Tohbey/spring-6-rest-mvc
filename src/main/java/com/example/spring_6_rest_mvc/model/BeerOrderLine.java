@@ -1,6 +1,7 @@
 package com.example.spring_6_rest_mvc.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Entity
 @Builder
 public class BeerOrderLine {
+
     @Id
     @GeneratedValue(generator = "UUID")
     @UuidGenerator
@@ -38,12 +40,13 @@ public class BeerOrderLine {
         return this.id == null;
     }
 
-    private Integer orderQuantity = 0;
-    private Integer quantityAllocated = 0;
+    @ManyToOne
+    private BeerOrder beerOrder;
 
     @ManyToOne
     private Beer beer;
 
-    @ManyToOne
-    private BeerOrder beerOrder;
+    @Min(value = 1, message = "Quantity On Hand must be greater than 0")
+    private Integer orderQuantity = 1;
+    private Integer quantityAllocated = 0;
 }

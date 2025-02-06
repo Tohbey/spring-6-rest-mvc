@@ -1,6 +1,7 @@
 package com.example.spring_6_rest_mvc.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -18,7 +19,6 @@ import java.util.UUID;
 @Entity
 @Builder
 public class BeerOrderShipment {
-
     @Id
     @GeneratedValue(generator = "UUID")
     @UuidGenerator
@@ -32,6 +32,7 @@ public class BeerOrderShipment {
     @OneToOne
     private BeerOrder beerOrder;
 
+    @NotBlank
     private String trackingNumber;
 
     @Override
