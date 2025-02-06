@@ -2,6 +2,7 @@ package com.example.spring_6_rest_mvc.service;
 
 import com.example.spring_6_rest_mvc.dto.BeerOrderCreateDTO;
 import com.example.spring_6_rest_mvc.dto.BeerOrderDTO;
+import com.example.spring_6_rest_mvc.dto.BeerOrderUpdateDTO;
 import com.example.spring_6_rest_mvc.model.BeerOrder;
 import org.springframework.data.domain.Page;
 
@@ -15,4 +16,6 @@ public interface BeerOrderService {
     Page<BeerOrderDTO> listOrders(Integer pageNumber, Integer pageSize);
 
     BeerOrder createOrder(BeerOrderCreateDTO beerOrderCreateDTO);
+
+    BeerOrderDTO updateOrder(UUID beerOrderId, BeerOrderUpdateDTO beerOrderUpdateDTO);
 }

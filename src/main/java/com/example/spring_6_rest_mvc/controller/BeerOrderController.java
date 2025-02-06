@@ -2,6 +2,7 @@ package com.example.spring_6_rest_mvc.controller;
 
 import com.example.spring_6_rest_mvc.dto.BeerOrderCreateDTO;
 import com.example.spring_6_rest_mvc.dto.BeerOrderDTO;
+import com.example.spring_6_rest_mvc.dto.BeerOrderUpdateDTO;
 import com.example.spring_6_rest_mvc.exception.NotFoundException;
 import com.example.spring_6_rest_mvc.model.BeerOrder;
 import com.example.spring_6_rest_mvc.service.BeerOrderService;
@@ -38,5 +39,10 @@ public class BeerOrderController {
         BeerOrder savedBeerOrder = beerOrderService.createOrder(beerOrderCreateDTO);
 
         return ResponseEntity.created(URI.create(BEER_ORDER_PATH + "/" + savedBeerOrder.getId())).build();
+    }
+
+    @PutMapping(BEER_ORDER_PATH_ID)
+    public BeerOrderDTO updateOrder(@PathVariable UUID beerOrderId, @RequestBody BeerOrderUpdateDTO beerOrderUpdateDTO) {
+        return beerOrderService.updateOrder(beerOrderId, beerOrderUpdateDTO);
     }
 }
