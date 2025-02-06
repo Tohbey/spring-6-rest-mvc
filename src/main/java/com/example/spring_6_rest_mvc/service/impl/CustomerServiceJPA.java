@@ -28,7 +28,7 @@ public class CustomerServiceJPA implements CustomerService {
     private final CustomerMapper customerMapper;
     private final CacheManager cacheManager;
 
-    @Cacheable(cacheNames = "customerCache", key = "#id")
+    @Cacheable(cacheNames = "customerCache", key = "#uuid")
     @Override
     public Optional<CustomerDTO> getCustomerById(UUID uuid) {
         return Optional.of(

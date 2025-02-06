@@ -8,6 +8,7 @@ import com.example.spring_6_rest_mvc.exception.NotFoundException;
 import com.example.spring_6_rest_mvc.mappers.BeerMapper;
 import com.example.spring_6_rest_mvc.model.Beer;
 import com.example.spring_6_rest_mvc.model.BeerStyle;
+import com.example.spring_6_rest_mvc.repositories.BeerOrderRepository;
 import com.example.spring_6_rest_mvc.repositories.BeerRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
@@ -78,6 +79,8 @@ class BeerControllerTestIT {
                         .subject("messaging-client")
                         .notBefore(Instant.now().minusSeconds(5l));
             });
+    @Autowired
+    private BeerOrderRepository beerOrderRepository;
 
 
     @BeforeEach
@@ -237,6 +240,7 @@ class BeerControllerTestIT {
     @Transactional
     @Test
     void testEmptyList() {
+        beerOrderRepository.deleteAll();
         beerRepository.deleteAll();
         Page<BeerDTO> dtos = beerController.listBeers(null, null, null, null, null);
 
