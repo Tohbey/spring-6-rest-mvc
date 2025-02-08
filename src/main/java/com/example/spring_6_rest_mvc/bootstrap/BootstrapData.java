@@ -8,7 +8,6 @@ import com.example.spring_6_rest_mvc.repositories.CustomerRepository;
 import com.example.spring_6_rest_mvc.service.BeerCsvService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -17,6 +16,7 @@ import org.springframework.util.ResourceUtils;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.math.BigDecimal;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -41,7 +41,10 @@ public class BootstrapData implements CommandLineRunner {
     }
 
     private void loadBeerCSVData() throws FileNotFoundException {
+//        String currentDir = System.getProperty("user.dir");
         if(beerRepository.count()  < 10){
+//            uncomment for docker
+//            File file = new File(currentDir+ "/resources/csvData/beers.csv");
             File file = ResourceUtils.getFile("classpath:csvdata/beers.csv");
             List<BeerCSVRecord> recs = beerCsvService.convertCSV(file);
 
